@@ -64,21 +64,17 @@ class ExtractContent(object):
             opt = self.default
 
         # header & title
-        header = re.match(r"(?s)</head\s*>", html)
-        if header != None:
-            html = html[:header.end()]
-            title = self.extract_title(html[0:header.start()])
-        else:
+        header = re.search(r"(?s)</head\s*>", html)
+        if header is None:
             title = self.extract_title(html)
+        else:
+            html = html[header.end():]
+            title = self.extract_title(html[0:header.start()])
 
         # Google AdSense Section Target
-        html = re.sub(r"""(?is)<!--\s*google_ad_section_start\(weight=
-                ignore\)\s*-->.*?<!--\s*google_ad_section_end.*?-->""",
-                "", html)
-        if re.search(r"(?is)<!--\s*google_ad_section_start[^>]*-->",
-                html) != None:
-            result = re.findall(r"""(?is)<!--\s*google_ad_section_start
-                    [^>]*-->.*?<!--\s*google_ad_section_end.*?-->""", html)
+        html = re.sub(r"(?is)<!--\s*google_ad_section_start\(weight=ignore\)\s*-->.*?<!--\s*google_ad_section_end.*?-->", "", html)
+        if re.search(r"(?is)<!--\s*google_ad_section_start[^>]*-->.*?<!--\s*google_ad_section_end.*?-->", html):
+            result = re.findall(r"(?is)<!--\s*google_ad_section_start[^>]*-->.*?<!--\s*google_ad_section_end.*?-->", html)
             html = "\n".join(result)
 
         # eliminate useless text
